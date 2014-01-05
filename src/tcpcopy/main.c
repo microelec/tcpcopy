@@ -15,7 +15,7 @@
 
 #include <xcopy.h>
 #include <tcpcopy.h>
-
+#include <tc_config.h>
 /* global variables for TCPCopy client */
 xcopy_clt_settings clt_settings;
 
@@ -66,14 +66,15 @@ usage(void)
            "               requests from port '8080' of current online server to the target port\n"
            "               '8080' of target server '192.168.0.2' and modify the client IP to be\n"
            "               '192.168.0.1'.\n");
-#if (TCPCOPY_OFFLINE)
+  if(isOfflineMode())
+  {
     printf("-i <file>      set the pcap file used for tcpcopy to <file> (only valid for the\n"
            "               offline version of tcpcopy when it is configured to run at\n"
            "               enable-offline mode).\n");
     printf("-a <num>       accelerated times for offline replay\n");
     printf("-I <num>       set the threshold interval for offline replay acceleration\n"
            "               in millisecond.\n");
-#endif
+  }
 #if (TCPCOPY_PCAP)
     printf("-i <device,>   The name of the interface to listen on. This is usually a driver\n"
            "               name followed by a unit number, for example eth0 for the first\n"
@@ -384,9 +385,10 @@ output_for_debug(int argc, char **argv)
 #if (TCPCOPY_MYSQL_NO_SKIP)
     tc_log_info(LOG_NOTICE, 0, "TCPCOPY_MYSQL_NO_SKIP mode");
 #endif
-#if (TCPCOPY_OFFLINE)
-    tc_log_info(LOG_NOTICE, 0, "TCPCOPY_OFFLINE mode");
-#endif
+    if(isOfflineMode())
+    {
+      tc_log_info(LOG_NOTICE, 0, "TCPCOPY_OFFLINE mode");
+    }
 #if (TCPCOPY_PCAP)
     tc_log_info(LOG_NOTICE, 0, "TCPCOPY_PCAP mode");
 #endif
@@ -944,6 +946,9 @@ main(int argc, char **argv)
 #endif
 
     tc_time_init();
+
+    initializeConfiguration();
+    readConfigurationFile("tcpcopy.conf"); // hardcode temply
 
     if (read_args(argc, argv) == -1) {
         return -1;

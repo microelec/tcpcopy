@@ -6,6 +6,7 @@ tcpcopy_SOURCES=\
                 tc_packets_module.c tc_packets_module.h\
                 tc_message_module.c tc_message_module.h\
                 tc_manager.h tc_manager.c\
+                tc_config.h tc_config.c\
                 main.c
 tcpcopy_LDADD=\
                ../core/libcore.a\
@@ -21,6 +22,7 @@ tcpcopy_SOURCES=\
                 tc_packets_module.h tc_packets_module.c\
                 tc_message_module.h tc_message_module.c\
                 tc_manager.h tc_manager.c\
+                tc_config.h tc_config.c\
                 main.c
 tcpcopy_LDADD=\
                ../core/libcore.a\
