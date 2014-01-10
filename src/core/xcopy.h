@@ -342,11 +342,8 @@ typedef struct connections_s{
     int fds[MAX_CONNECTION_NUM];
 }connections_t;
 
-#if (TCPCOPY_OFFLINE)
-#define TIMER_INTERVAL 1
-#else
+#define TIMER_INTERVAL_OFFLINE 1
 #define TIMER_INTERVAL 10
-#endif
 
 #if (INTERCEPT_COMBINED)
 #define INTERCEPT_TIMER_INTERVAL 1

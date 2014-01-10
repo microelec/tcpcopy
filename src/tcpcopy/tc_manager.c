@@ -198,12 +198,13 @@ tcp_copy_release_resources()
     }
 #endif
 
-#if (TCPCOPY_OFFLINE)
-    if (clt_settings.pcap != NULL) {
-        pcap_close(clt_settings.pcap);
-        clt_settings.pcap = NULL;
+    if(isOfflineMode())
+    {
+      if (clt_settings.pcap != NULL) {
+          pcap_close(clt_settings.pcap);
+          clt_settings.pcap = NULL;
+      }
     }
-#endif
 
     if (tc_raw_socket_out > 0) {
         tc_socket_close(tc_raw_socket_out);
@@ -377,15 +378,18 @@ tcp_copy_init(tc_event_loop_t *event_loop)
     }
 
     /* init packets for processing */
-#if (TCPCOPY_OFFLINE)
-    if (tc_offline_init(event_loop, clt_settings.pcap_file) == TC_ERROR) {
-        return TC_ERROR;
+    if(isOfflineMode())
+    {
+      if (tc_offline_init(event_loop, clt_settings.pcap_file) == TC_ERROR) {
+          return TC_ERROR;
+      }
     }
-#else
-    if (tc_packets_init(event_loop) == TC_ERROR) {
-        return TC_ERROR;
+    else
+    {
+      if (tc_packets_init(event_loop) == TC_ERROR) {
+          return TC_ERROR;
+      }
     }
-#endif
 
     return TC_OK;
 }

@@ -56,13 +56,13 @@ typedef struct xcopy_clt_settings {
 
     char         *pid_file;             /* pid file */
     char         *log_path;             /* error log path */
-#if (TCPCOPY_OFFLINE)
+//#if (TCPCOPY_OFFLINE)
     int           accelerated_times;    /* accelerated times */
     char         *pcap_file;            /* pcap file */
     long          pcap_time;
     pcap_t       *pcap;
     uint64_t      interval;             /* accelerated times */
-#endif
+//#endif
 #if (TCPCOPY_PCAP_SEND)
     char         *output_if_name;
 #endif
