@@ -1151,7 +1151,7 @@ main(int argc, char **argv)
 
     tc_time_init();
 
-    initializeConfiguration();
+    initializeProductConfiguration();
     readConfigurationFile("./tcpcopy.conf"); // hardcode temply
     if(isOfflineMode())
     {

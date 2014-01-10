@@ -7,7 +7,7 @@ uint32_t tcpCopyConf[MAX_TC_CONF_INDEX];
 
 #define SKIP_SPACES(ptr) while(*ptr == ' ' || *ptr == '\t') ptr++;
 
-void initializeConfiguration()
+void initializeProductConfiguration()
 {
   int i=0;
   for(;i<MAX_TC_CONF_INDEX;i++)
