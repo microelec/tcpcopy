@@ -158,11 +158,9 @@ read_args_offline_mode(int argc, char **argv)
     while (-1 != (c = getopt(argc, argv,
          "x:" /* <transfer,> */
          "c:" /* the localhost client ip will be changed to this ip address */
-//#if (TCPCOPY_OFFLINE)
          "i:" /* input pcap file */
          "a:" /* accelerated times */
          "I:" /* threshold interval time for acceleratation */
-//#endif
 #if (TCPCOPY_PCAP)
          "i:" /* <device,> */
          "F:" /* <filter> */
@@ -203,7 +201,6 @@ read_args_offline_mode(int argc, char **argv)
             case 'c':
                 clt_settings.raw_clt_tf_ip = optarg;
                 break;
-#if (TCPCOPY_OFFLINE)
             case 'i':
                 clt_settings.pcap_file = optarg;
                 break;
@@ -213,7 +210,6 @@ read_args_offline_mode(int argc, char **argv)
             case 'I':
                 clt_settings.interval = atoi(optarg);
                 break;
-#endif
 #if (TCPCOPY_PCAP_SEND)
             case 'o':
                 clt_settings.output_if_name = optarg;
@@ -304,9 +300,7 @@ read_args_offline_mode(int argc, char **argv)
                         fprintf(stderr, "tcpcopy: option -%c require a ip address\n", 
                                 optopt);
                         break;
-//#if (TCPCOPY_OFFLINE)
                     case 'i':
-//#endif
                     case 'l':
                     case 'P':
                         fprintf(stderr, "tcpcopy: option -%c require a file name\n", 
@@ -334,10 +328,8 @@ read_args_offline_mode(int argc, char **argv)
                     case 'n':
                     case 'f':
                     case 'C':
-//#if (TCPCOPY_OFFLINE)
                     case 'a':
                     case 'I':
-//#endif
 #if (TCPCOPY_PCAP)
                     case 'B':
 #endif

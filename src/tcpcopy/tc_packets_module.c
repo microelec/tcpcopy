@@ -4,13 +4,11 @@
 
 uint32_t              ip_tf[65536];
 uint16_t              ip_tf_cnt = 0;
-//#if (TCPCOPY_OFFLINE)
 static bool           read_pcap_over = false;
 static time_t         read_pcap_over_time;
 static uint64_t       accumulated_diff = 0, adj_v_pack_diff = 0;
 static struct timeval first_pack_time, last_v_pack_time,
                       last_pack_time, base_time, cur_time;
-//#endif
 
 #if (TCPCOPY_PCAP)
 static  pcap_t       *pcap_map[MAX_FD_NUM];
@@ -27,12 +25,10 @@ static void replicate_packs(unsigned char *frame, int frame_len,
 static int dispose_packet(unsigned char *frame, int frame_len, int ip_recv_len, 
         int *p_valid_flag);
 
-//#if (TCPCOPY_OFFLINE)
 static void tc_process_offline_packet(tc_event_timer_t *evt);
 static uint64_t timeval_diff(struct timeval *start, struct timeval *cur);
 static bool check_read_stop();
 static void send_packets_from_pcap(int first);
-//#endif
 
 
 static uint16_t
@@ -509,7 +505,6 @@ dispose_packet(unsigned char *frame, int frame_len, int ip_recv_len,
 }
 #endif
 
-//#if (TCPCOPY_OFFLINE)
 int
 tc_offline_init(tc_event_loop_t *event_loop, char *pcap_file)
 {
@@ -696,5 +691,4 @@ send_packets_from_pcap(int first)
         }
     }
 }
-//#endif /* TCPCOPY_OFFLINE */
 

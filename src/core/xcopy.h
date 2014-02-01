@@ -41,9 +41,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <getopt.h>
-//#if (TCPCOPY_OFFLINE || TCPCOPY_PCAP || TCPCOPY_PCAP_SEND)
 #include <pcap.h>
-//#endif
 #if (TCPCOPY_MYSQL_NO_SKIP)
 #include <openssl/evp.h>
 #endif
@@ -51,15 +49,6 @@
 #if (INTERCEPT_ADVANCED)
 #define TCPCOPY_DR 1
 #endif
-/*
-#if (TCPCOPY_PCAP)
-#undef TCPCOPY_OFFLINE
-#endif
-
-#if (TCPCOPY_OFFLINE)
-#undef TCPCOPY_PCAP
-#endif
-*/
 /* 
  * If you define TCPCOPY_MYSQL_SKIP nonzero,
  * tcpcopy works only for mysql which sets

@@ -285,7 +285,6 @@ construct_filter(int flag, uint32_t ip, uint16_t port, char *filter)
 }
 #endif
 
-#if (TCPCOPY_PCAP )
 int
 get_l2_len(const unsigned char *frame, const int pkt_len, const int datalink)
 {
@@ -352,7 +351,6 @@ get_ip_data(pcap_t *pcap, unsigned char *frame, const int pkt_len,
     return ptr;
 
 }
-#endif
 
 #if (TCPCOPY_PCAP_SEND)
 inline void

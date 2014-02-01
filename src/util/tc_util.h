@@ -39,13 +39,11 @@ int retrieve_devices(char *raw_device, devices_t *devices);
 char *construct_filter(int flag, uint32_t ip, uint16_t port, char *filter);
 #endif
 
-#if (TCPCOPY_PCAP)
 int get_l2_len(const unsigned char *frame, const int pkt_len, 
         const int datalink);
 unsigned char *
 get_ip_data(pcap_t *pcap, unsigned char *frame, const int pkt_len, 
         int *p_l2_len);
-#endif
 
 #if (TCPCOPY_PCAP_SEND)
 inline void fill_frame(struct ethernet_hdr *hdr, 

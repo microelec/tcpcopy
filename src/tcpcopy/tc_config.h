@@ -21,7 +21,7 @@ typedef enum ERunMode
 }ERunMode;
 
 //global function
-void initializeConfiguration();
+void initializeProductConfiguration();
 bool isOfflineMode();
 void readConfigurationFile(char *fileName);
 

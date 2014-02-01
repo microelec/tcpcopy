@@ -28,8 +28,9 @@ void doConfiguration(uint32_t index, uint32_t value)
   tcpCopyConf[index]=value;
 }
 
-// parseLine
-// retrun true for "index=value" pattern
+/* parseLine
+ * retrun true for "index=value" pattern
+ */
 static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr)
 {
   char *end_ptr = NULL;
@@ -38,14 +39,14 @@ static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr
 
   SKIP_SPACES(string_ptr)
 
-  //Check if pure comment line 
+  /* Check if pure comment line */
   if(*string_ptr == '#')
   {
     *index_ptr = 0;
     *value_ptr = 0;
     return false;
   }
-  // Check if empty line 
+  /* Check if empty line */
   if(*string_ptr == '\0' || *string_ptr == '\r' || *string_ptr == '\n')
   {
     *index_ptr = 0;
@@ -53,12 +54,12 @@ static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr
     return false;
   }
 
-  // Convert string presentation of domain and index to long value 
+  /* Convert string presentation of domain and index to long value */
   param = (uint32_t) strtoul(string_ptr, &end_ptr, 0);
   *index_ptr = param;
   
   
-  // Check if string ended too early 
+  /* Check if string ended too early */
   if(end_ptr == NULL)
   {
     *index_ptr = 0;
@@ -86,23 +87,23 @@ static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr
 
   SKIP_SPACES(string_ptr)
 
-  // Convert string presentation of value to long value 
+  /* Convert string presentation of value to long value */
   *value_ptr = (uint32_t) strtoul(string_ptr, &end_ptr, 0);
 
-  // Check if string ended OK 
+  /* Check if string ended OK */
   if(end_ptr != NULL)
   {
     SKIP_SPACES(end_ptr)
     
     if(*end_ptr == '\0')
     {
-      //This line is the last in file 
+      /*This line is the last in file */
       return false;
     }
 
     if(*end_ptr != '#' && *end_ptr != '\n' && *end_ptr != '\r')
     {
-      // Parse error 
+      /* Parse error */
       *index_ptr = 0;
       *value_ptr = 0;
       
@@ -116,7 +117,11 @@ static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr
 
 void readConfigurationFile(char *fileName)
 {
-  //fopen
+  /*readline and parse line*/
+  char lineBuf[200];
+  uint32_t confIndex = 0;
+  uint32_t confValue = 0;
+ 
   FILE* fp = NULL;
   fp = fopen(fileName,"r");
   if(fp==NULL)
@@ -125,11 +130,7 @@ void readConfigurationFile(char *fileName)
     return;
   }
 
-  //readline and parse line
-  char lineBuf[200];
-  uint32_t confIndex = 0;
-  uint32_t confValue = 0;
-   
+  
   while(NULL !=fgets(lineBuf, sizeof(lineBuf)-1, fp))
   {
     bool parseOk = parseLine(&lineBuf[0],&confIndex,&confValue);
@@ -137,7 +138,6 @@ void readConfigurationFile(char *fileName)
     if(parseOk && confIndex<MAX_TC_CONF_INDEX)
       doConfiguration(confIndex,confValue);
   }
-  //fclose
   fclose(fp);
 }
   
