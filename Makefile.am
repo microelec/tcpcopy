@@ -6,6 +6,8 @@ EXTRA_DIST = README\
              INSTALL\
              NEWS\
              configure.ac
+             
+sysconf_DATA = ./conf/tcpcopy.conf
 
 .PHONY: release snapshot
 
