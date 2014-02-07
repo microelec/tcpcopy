@@ -56,6 +56,7 @@ typedef struct xcopy_clt_settings {
 
     char         *pid_file;             /* pid file */
     char         *log_path;             /* error log path */
+    char         *config_path;          /* config file path */
     int           accelerated_times;    /* accelerated times */
     char         *pcap_file;            /* pcap file */
     long          pcap_time;

@@ -2,10 +2,22 @@
 
 #include <tc_config.h>
 #include <stdio.h>
-
-uint32_t tcpCopyConf[MAX_TC_CONF_INDEX];
+#include <string.h>
 
 #define SKIP_SPACES(ptr) while(*ptr == ' ' || *ptr == '\t') ptr++;
+static void set_num(void *conf, uint32_t confIndex, char *value);
+static void readConfigurationFile(char *fileName);
+
+
+uint32_t tcpCopyConf[MAX_TC_CONF_INDEX];
+#define ERROR -1
+
+SConfMapping confMappingTable[]=
+{
+{"runMode",RunModeIndex,set_num}
+
+
+};
 
 void initializeProductConfiguration()
 {
@@ -15,6 +27,12 @@ void initializeProductConfiguration()
 
   tcpCopyConf[RunModeIndex] = Online;
 
+  /* Set config file path, only support default path currently*/
+  clt_settings.config_path = "/usr/local/etc/tcpcopy.conf";
+
+  
+  readConfigurationFile(clt_settings.config_path); 
+
 }
 
 bool isOfflineMode() 
@@ -23,18 +41,68 @@ bool isOfflineMode()
 }
 
 
-void doConfiguration(uint32_t index, uint32_t value) 
+static uint32_t str_to_uint(char *line)
 {
-  tcpCopyConf[index]=value;
+    int  value;
+    for(value = 0; *line != '\0'; line++) {
+        if (*line < '0' || *line > '9') {
+            return ERROR;
+        }
+
+        value = value * 10 + (*line - '0');
+    }
+
+    if (value < 0) {
+        return ERROR;
+
+    } else {
+        return value;
+    }
+}
+
+void set_str(void *conf, uint32_t confIndex, char *value)
+{
+  
+}
+static void set_num(void *conf, uint32_t confIndex, char *value)
+{
+  uint32_t *p = conf;
+  uint32_t val = str_to_uint(value);
+  if(ERROR != val)
+    *(p + confIndex) = val;
+}
+
+static uint32_t findConfIndex(char* key)
+{
+  int cfgNum = sizeof(confMappingTable)/sizeof(confMappingTable[0]);
+  SConfMapping *item = &confMappingTable[0];
+  int i;
+  for(i = 0; i<cfgNum; i++)
+    if(0 == strcmp(item[i].key,key))
+      return i;
+
+ return ERROR;
+}
+
+static void doConfiguration(char* key, char* value) 
+{
+  //tcpCopyConf[index]=value;
+  uint32_t mappingTableIndex = findConfIndex(key);
+  if(ERROR == mappingTableIndex)
+  {
+    tc_log_info(LOG_ERR, 0, "doConfiguration() Error: not supported configuration %s",key);
+    return;
+  }
+  //Only support "str=int" format first
+  confMappingTable[mappingTableIndex].set(tcpCopyConf,confMappingTable[mappingTableIndex].index,value);
+  
 }
 
 /* parseLine
  * retrun true for "index=value" pattern
  */
-static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr)
+static bool parseLine(char *string_ptr, char *index_ptr, char *value_ptr)
 {
-  char *end_ptr = NULL;
-  uint32_t param;
   char *origLine = string_ptr;
 
   SKIP_SPACES(string_ptr)
@@ -54,73 +122,43 @@ static bool parseLine(char *string_ptr, uint32_t *index_ptr, uint32_t *value_ptr
     return false;
   }
 
-  /* Convert string presentation of domain and index to long value */
-  param = (uint32_t) strtoul(string_ptr, &end_ptr, 0);
-  *index_ptr = param;
-  
-  
-  /* Check if string ended too early */
-  if(end_ptr == NULL)
+  /* Get the key*/
+  int i = 0;
+  while('=' !=*string_ptr &&' ' !=*string_ptr&&'\t' !=*string_ptr&& i<20)
   {
-    *index_ptr = 0;
-    *value_ptr = 0;
-    
+    *index_ptr++ = *string_ptr++;
+    i++;
+  }
+  *index_ptr = '\0';
+  SKIP_SPACES(string_ptr)
+  
+  if('=' !=*string_ptr)
+  {
     tc_log_info(LOG_ERR, 0, "parseLine() Error when parsing line: %s",origLine);
     return false;
   }
-
-  SKIP_SPACES(end_ptr)
-
-  if(*end_ptr != '=')
-  {
-    *index_ptr = 0;
-    *value_ptr = 0;
-    
-    tc_log_info(LOG_ERR, 0, "parseLine() Error when parsing line: %s",origLine);
-                   
-    return false;
-  }
-
-  string_ptr = end_ptr;
+  /* skip '='*/
   string_ptr++;
-  end_ptr = NULL; 
 
   SKIP_SPACES(string_ptr)
 
-  /* Convert string presentation of value to long value */
-  *value_ptr = (uint32_t) strtoul(string_ptr, &end_ptr, 0);
-
-  /* Check if string ended OK */
-  if(end_ptr != NULL)
+  /* Get the value*/
+  i = 0;
+  while('#' !=*string_ptr &&'\n' !=*string_ptr&&'\r' !=*string_ptr&&' ' !=*string_ptr&&'\t' !=*string_ptr&& i<20)
   {
-    SKIP_SPACES(end_ptr)
-    
-    if(*end_ptr == '\0')
-    {
-      /*This line is the last in file */
-      return false;
-    }
-
-    if(*end_ptr != '#' && *end_ptr != '\n' && *end_ptr != '\r')
-    {
-      /* Parse error */
-      *index_ptr = 0;
-      *value_ptr = 0;
-      
-      tc_log_info(LOG_ERR, 0, "parseLine() Error when parsing line: %s",origLine);
-      return false;
-    }
+    *value_ptr++ = *string_ptr++;
+    i++;
   }
-  
+  *value_ptr = '\0';
   return true;
 }
 
-void readConfigurationFile(char *fileName)
+static void readConfigurationFile(char *fileName)
 {
   /*readline and parse line*/
   char lineBuf[200];
-  uint32_t confIndex = 0;
-  uint32_t confValue = 0;
+  char confIndex[21];
+  char confValue[21];
  
   FILE* fp = NULL;
   fp = fopen(fileName,"r");
@@ -135,7 +173,7 @@ void readConfigurationFile(char *fileName)
   {
     bool parseOk = parseLine(&lineBuf[0],&confIndex,&confValue);
 
-    if(parseOk && confIndex<MAX_TC_CONF_INDEX)
+    if(parseOk)
       doConfiguration(confIndex,confValue);
   }
   fclose(fp);

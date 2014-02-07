@@ -147,10 +147,31 @@ usage(void)
 }
 
 
+static int
+read_args_offline_mode(int argc)
+{
+    switch (argc) {
+      case 'i':
+          clt_settings.pcap_file = optarg;
+          /*raw_device also use -i, to be clean*/
+          
+          #if (TCPCOPY_PCAP)
+          clt_settings.raw_device = optarg;
+          #endif
+          break;
+      case 'a':
+          clt_settings.accelerated_times = atoi(optarg);
+          break;
+      case 'I':
+          clt_settings.interval = atoi(optarg);
+          break;
+      }
+    
+}
 
 
 static int
-read_args_offline_mode(int argc, char **argv)
+read_args(int argc, char **argv)
 {
     int  c;
 
@@ -202,13 +223,9 @@ read_args_offline_mode(int argc, char **argv)
                 clt_settings.raw_clt_tf_ip = optarg;
                 break;
             case 'i':
-                clt_settings.pcap_file = optarg;
-                break;
             case 'a':
-                clt_settings.accelerated_times = atoi(optarg);
-                break;
             case 'I':
-                clt_settings.interval = atoi(optarg);
+                read_args_offline_mode(c);
                 break;
 #if (TCPCOPY_PCAP_SEND)
             case 'o':
@@ -360,202 +377,6 @@ read_args_offline_mode(int argc, char **argv)
     return 0;
 }
 
-
-static int
-read_args(int argc, char **argv)
-{
-    int  c;
-
-    opterr = 0;
-    while (-1 != (c = getopt(argc, argv,
-         "x:" /* <transfer,> */
-         "c:" /* the localhost client ip will be changed to this ip address */
-#if (TCPCOPY_PCAP)
-         "i:" /* <device,> */
-         "F:" /* <filter> */
-         "B:" 
-#endif
-#if (TCPCOPY_PCAP_SEND)
-         "o:" /* <device,> */
-#endif
-#if (TCPCOPY_MYSQL_ADVANCED)
-         "u:" /* user password pair for mysql */
-#endif
-         "n:" /* set the replication times */
-         "f:" /* use this parameter to reduce port conflications */
-         "m:" /* set the maximum memory allowed to use for tcpcopy */
-         "C:" /* parallel connections between tcpcopy and intercept */
-         "p:" /* target server port to listen on */
-         "r:" /* percentage of sessions transfered */
-         "M:" /* MTU sent to backend */
-         "S:" /* mss value sent to backend */
-         "t:" /* set the session timeout limit */
-         "k:" /* set the session keepalive timeout limit */
-#if (TCPCOPY_DR)
-         "s:" /* real servers running intercept*/
-#endif
-         "l:" /* error log file */
-         "P:" /* save PID in file */
-#if (TCPCOPY_DR)
-         "L"  /* lonely */
-#endif
-         "h"  /* help, licence info */
-         "v"  /* version */
-         "d"  /* daemon mode */
-        ))) {
-        switch (c) {
-            case 'x':
-                clt_settings.raw_transfer = optarg;
-                break;
-            case 'c':
-                clt_settings.raw_clt_tf_ip = optarg;
-                break;
-#if (TCPCOPY_PCAP_SEND)
-            case 'o':
-                clt_settings.output_if_name = optarg;
-                break;
-#endif
-#if (TCPCOPY_PCAP)
-            case 'i':
-                clt_settings.raw_device = optarg;
-                break;
-            case 'F':
-                clt_settings.user_filter = optarg;
-                break;
-            case 'B':
-                clt_settings.buffer_size = 1024 * 1024 * atoi(optarg);
-                break;
-
-#endif
-#if (TCPCOPY_MYSQL_ADVANCED)
-            case 'u':
-                clt_settings.user_pwd = optarg;
-                break;
-#endif
-            case 'n':
-                clt_settings.replica_num = atoi(optarg);
-                break;
-            case 'f':
-                clt_settings.factor = atoi(optarg);
-                break;
-            case 'm':
-                clt_settings.max_rss = 1024 * atoi(optarg);
-                break;
-            case 'C':
-                clt_settings.par_connections = atoi(optarg);
-                break;
-            case 'l':
-                clt_settings.log_path = optarg;
-                break;
-            case 'M':
-                clt_settings.mtu = atoi(optarg);
-                break;
-            case 'S':
-                clt_settings.mss = atoi(optarg);
-                break;
-#if (TCPCOPY_DR)
-            case 's':
-                clt_settings.raw_rs_list = optarg;
-                break;
-#endif
-            case 't':
-                clt_settings.session_timeout = atoi(optarg);
-                break;
-            case 'k':
-                clt_settings.session_keepalive_timeout = atoi(optarg);
-                break;
-            case 'h':
-                usage();
-                return -1;
-            case 'v':
-                printf ("tcpcopy version:%s\n", VERSION);
-                return -1;
-            case 'd':
-                clt_settings.do_daemonize = 1;
-                break;
-#if (TCPCOPY_DR)
-            case 'L':
-                clt_settings.lonely = 1;
-                break;
-#endif 
-            case 'p':
-                clt_settings.srv_port = atoi(optarg);
-                break;
-            case 'P':
-                clt_settings.pid_file = optarg;
-                break;
-            case 'r':
-                clt_settings.percentage = atoi(optarg);
-                break;
-            case '?':
-                switch (optopt) {    
-                    case 'x':
-#if (TCPCOPY_MYSQL_ADVANCED)
-                    case 'u':
-#endif
-                        fprintf(stderr, "tcpcopy: option -%c require a string\n", 
-                                optopt);
-                        break;
-                    case 'c':
-                        fprintf(stderr, "tcpcopy: option -%c require a ip address\n", 
-                                optopt);
-                        break;
-                    case 'l':
-                    case 'P':
-                        fprintf(stderr, "tcpcopy: option -%c require a file name\n", 
-                                optopt);
-                        break;
-#if (TCPCOPY_PCAP)
-                    case 'i':
-                        fprintf(stderr, "tcpcopy: option -%c require a device name\n",
-                                optopt);
-                        break;
-#endif
-#if (TCPCOPY_PCAP_SEND)
-                    case 'o':
-                        fprintf(stderr, "tcpcopy: option -%c require a device name\n",
-                                optopt);
-                        break;
-#endif
-#if (TCPCOPY_DR)
-                    case 's':
-                        fprintf(stderr, "tcpcopy: option -%c require an ip address list\n",
-                                optopt);
-                        break;
-#endif
-
-                    case 'n':
-                    case 'f':
-                    case 'C':
-#if (TCPCOPY_PCAP)
-                    case 'B':
-#endif
-                    case 'm':
-                    case 'M':
-                    case 'S':
-                    case 't':
-                    case 'k':
-                    case 'p':
-                    case 'r':
-                        fprintf(stderr, "tcpcopy: option -%c require a number\n",
-                                optopt);
-                        break;
-
-                    default:
-                        fprintf(stderr, "tcpcopy: illegal argument \"%c\"\n",
-                                optopt);
-                        break;
-                }
-                return -1;
-
-            default:
-                fprintf(stderr, "tcpcopy: illegal argument \"%c\"\n", optopt);
-                return -1;
-        }
-    }
-
-    return 0;
-}
 
 static void
 output_for_debug(int argc, char **argv)
@@ -1144,20 +965,11 @@ main(int argc, char **argv)
     tc_time_init();
 
     initializeProductConfiguration();
-    readConfigurationFile("./tcpcopy.conf"); // hardcode temply
-    if(isOfflineMode())
-    {
-      if (read_args_offline_mode(argc, argv) == -1) {
-          return -1;
-      }
-    }
-    else
-    {
-      if (read_args(argc, argv) == -1) {
-          return -1;
-      }
 
+    if (read_args(argc, argv) == -1) {
+        return -1;
     }
+
     
     if (clt_settings.log_path == NULL) {
         clt_settings.log_path = "error_tcpcopy.log";
